@@ -1,0 +1,8 @@
+Activate env
+. .venv/bin/activate
+
+Install Python Packages:
+pip install -r requirements.txt
+
+Run Application 
+streamlit run .\CTEPartnersApp.py
