@@ -1,9 +1,9 @@
 import streamlit as st
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, text
-import pandas as pd
 import hashlib
 import sqlite3
+import pandas as pd
 
 # Connect to SQLite database
 conn = sqlite3.connect('example.db')
@@ -41,50 +41,65 @@ def set_logged_in(value):
 # Streamlit app starts here
 st.title('Partnersphere')
 
-# Radio button to switch between login and sign-up forms
-form_choice = st.sidebar.radio("Choose an action", ("Login", "Sign Up"))
+# Set a session state variable to track if the user has successfully logged in
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
 
-if form_choice == "Login":
-    st.subheader("Login")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    if st.button("Login"):
-        if verify_user(username, password):
-            st.success("Successfully logged in!")
-            set_logged_in(True)   
-            st.empty()
-        else:
-            st.error("Invalid username or password. Try signing up")
+# Display welcome message if the user is not logged in
+if not is_logged_in():
+    st.subheader("Welcome to Partnersphere!")
+    st.write("Please log in or sign up to access the app.")
 
-elif form_choice == "Sign Up":
-    st.subheader("Sign Up")
-    new_username = st.text_input("New Username")
-    new_password = st.text_input("New Password", type="password")
-    confirm_password = st.text_input("Confirm Password", type="password")
-    if st.button("Sign Up"):
-        if new_password == confirm_password:
-            if create_user(new_username, new_password):
-                st.success("User created successfully. Please login.")
+    # Radio button to switch between login and sign-up forms
+    form_choice = st.sidebar.radio("Choose an action", ("Login", "Sign Up"))
+
+    if form_choice == "Login":
+        st.subheader("Login")
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        if st.button("Login"):
+            if verify_user(username, password):
+                st.success("Successfully logged in!")
+                set_logged_in(True)
+                st.empty()  # Remove the welcome message once logged in
             else:
-                st.error("Username already exists.")
-        else:
-            st.error("Passwords do not match.")
+                st.error("Invalid username or password. Try signing up")
+
+    elif form_choice == "Sign Up":
+        st.subheader("Sign Up")
+        new_username = st.text_input("New Username")
+        new_password = st.text_input("New Password", type="password")
+        confirm_password = st.text_input("Confirm Password", type="password")
+        if st.button("Sign Up"):
+            if new_password == confirm_password:
+                if create_user(new_username, new_password):
+                    st.success("User created successfully. Please login.")
+                else:
+                    st.error("Username already exists.")
+            else:
+                st.error("Passwords do not match.")
 
 # Only display the main app content if the user is logged in
 if is_logged_in():
     st.empty()
+    # Your main app content here
+
+
+# Only display the main app content if the user is logged in
+if is_logged_in():
+    st.empty()
+
+    
     engine = create_engine('sqlite:///example.db')
     Session = sessionmaker(bind=engine)
     session = Session()
 
-
-
-    st.title(' Career and Technical Education Department Partners')
+    st.title('Career and Technical Education Department Partners')
 
     tabs = ["View Partners", "Add Partner", "Edit Partner", "Delete Partner"]
     choice = st.sidebar.selectbox("Menu", tabs)
     
-    
+    # Logout button
     if st.sidebar.button("Logout"):
         set_logged_in(False)
         st.experimental_rerun()
@@ -100,8 +115,6 @@ if is_logged_in():
             df = df[df['PartnerName'].str.contains(filter) | df['PartnerType'].str.contains(filter) | df['ContactPerson'].str.contains(filter)| df['ContactEmail'].str.contains(filter)| df['ContactPhone'].str.contains(filter)| df['Address'].str.contains(filter)| df['Website'].str.contains(filter)]
 
         st.dataframe(df, height=600, width=4100)
-        #st.table(df)
-        #st.write(df, height=600, width=4100)
 
     elif choice == "Add Partner":
         #id = st.number_input('Enter ID', value=1)
