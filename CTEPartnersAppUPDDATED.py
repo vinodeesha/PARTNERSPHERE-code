@@ -39,7 +39,7 @@ def set_logged_in(value):
     st.session_state.logged_in = value
 
 # Streamlit app starts here
-st.title('Login / Sign Up')
+st.title('Partnersphere')
 
 # Radio button to switch between login and sign-up forms
 form_choice = st.sidebar.radio("Choose an action", ("Login", "Sign Up"))
@@ -77,10 +77,17 @@ if is_logged_in():
     Session = sessionmaker(bind=engine)
     session = Session()
 
+
+
     st.title(' Career and Technical Education Department Partners')
 
     tabs = ["View Partners", "Add Partner", "Edit Partner", "Delete Partner"]
     choice = st.sidebar.selectbox("Menu", tabs)
+    
+    
+    if st.sidebar.button("Logout"):
+        set_logged_in(False)
+        st.experimental_rerun()
 
     if choice == "View Partners":
         # Fetch all suppliers
